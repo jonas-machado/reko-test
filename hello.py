@@ -24,7 +24,7 @@ local_image_path = [
     "assets/11.webp",
     "assets/12.webp",
 ]
-
+print(local_image_path)
 for image in local_image_path:
     random_image_name = str(uuid.uuid4()) + ".jpg"
     s3.upload_file(image, bucket_name, random_image_name)
