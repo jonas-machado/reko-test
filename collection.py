@@ -1,7 +1,7 @@
 import boto3
 
 # Initialize the Amazon Rekognition client
-session = boto3.Session(profile_name="Jonas Machado")
+session = boto3.Session(profile_name="default")
 rekognition_client = session.client("rekognition")
 
 # Specify the collection name
