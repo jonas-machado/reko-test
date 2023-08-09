@@ -7,7 +7,7 @@ s3 = boto3.client(
     aws_secret_access_key="VYcR1bNHlWQOKyrdbqa6hYnSSHm5DGsUKARbUgLy",
 )
 
-bucket_name = "sun-test-photo"
+bucket_name = "reko-sun"
 
 
 local_image_path = [
