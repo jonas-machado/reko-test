@@ -36,9 +36,16 @@ def main():
     collection_id = "sun-reko-collection"
     bucket = "reko-sun"
     photo = "021718ce-68da-4417-a0cb-719639e1e365.jpg"
+    session = boto3.Session(profile_name="default")
+    client = session.client("s3")
 
-    indexed_faces_count = add_faces_to_collection(bucket, photo, collection_id)
-    print("Faces indexed count: " + str(indexed_faces_count))
+    response = client.list_objects(Bucket="reko-sun")
+
+    for key in response["Contents"]:
+        print(key["Key"])
+
+        indexed_faces_count = add_faces_to_collection(bucket, key["Key"], collection_id)
+        print("Faces indexed count: " + str(indexed_faces_count))
 
 
 if __name__ == "__main__":
