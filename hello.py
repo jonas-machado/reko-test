@@ -10,12 +10,18 @@ s3 = boto3.client(
 bucket_name = "reko-sun"
 
 
-local_image_path = "assets/test.png"
+local_image_path = [
+    "assets/alan1.jpg",
+    "assets/alan2.jpg",
+    "assets/eliana.jpg",
+    "assets/eliana2.jpg",
+    "assets/eliana3.jpg",
+]
 print(local_image_path)
 
-random_image_name = str(uuid.uuid4()) + ".jpg"
-s3.upload_file(local_image_path, bucket_name, random_image_name)
+# random_image_name = str(uuid.uuid4()) + ".jpg"
+# s3.upload_file(local_image_path, bucket_name, random_image_name)
 
-# for image in local_image_path:
-#     random_image_name = str(uuid.uuid4()) + ".jpg"
-#     s3.upload_file(image, bucket_name, random_image_name)
+for image in local_image_path:
+    random_image_name = str(uuid.uuid4()) + ".jpg"
+    s3.upload_file(image, bucket_name, random_image_name)
