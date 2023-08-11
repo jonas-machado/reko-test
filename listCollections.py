@@ -4,38 +4,37 @@
 import boto3
 
 
-def list_collections():
-    max_results = 2
+def list_faces_in_collection(collection_id):
+    maxResults = 2
+    faces_count = 0
+    tokens = True
 
-    client = boto3.client("rekognition")
+    session = boto3.Session(profile_name="profile-name")
+    client = session.client("rekognition")
+    response = client.list_faces(CollectionId=collection_id, MaxResults=maxResults)
 
-    # Display all the collections
-    print("Displaying collections...")
-    response = client.list_collections(MaxResults=max_results)
-    collection_count = 0
-    done = False
+    print("Faces in collection " + collection_id)
 
-    while done == False:
-        collections = response["CollectionIds"]
+    while tokens:
+        faces = response["Faces"]
 
-        for collection in collections:
-            print(collection)
-            collection_count += 1
+        for face in faces:
+            print(face)
+            faces_count += 1
         if "NextToken" in response:
             nextToken = response["NextToken"]
-            response = client.list_collections(
-                NextToken=nextToken, MaxResults=max_results
+            response = client.list_faces(
+                CollectionId=collection_id, NextToken=nextToken, MaxResults=maxResults
             )
-
         else:
-            done = True
-
-    return collection_count
+            tokens = False
+    return faces_count
 
 
 def main():
-    collection_count = list_collections()
-    print("collections: " + str(collection_count))
+    collection_id = "collection-id"
+    faces_count = list_faces_in_collection(collection_id)
+    print("faces count: " + str(faces_count))
 
 
 if __name__ == "__main__":
