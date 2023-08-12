@@ -4,10 +4,22 @@
 import boto3
 
 
-def list_faces_in_collection(collection_id):
+def delete_faces_from_collection(collection_id, faces):
+    session = boto3.Session(profile_name="default")
+    client = session.client("rekognition")
+    response = client.delete_faces(CollectionId=collection_id, FaceIds=faces)
+
+    print(str(len(response["DeletedFaces"])) + " faces deleted:")
+    for faceId in response["DeletedFaces"]:
+        print(faceId)
+    return len(response["DeletedFaces"])
+
+
+def main():
     maxResults = 2
     faces_count = 0
     tokens = True
+    collection_id = "sun-reko-collection"
 
     session = boto3.Session(profile_name="default")
     client = session.client("rekognition")
@@ -15,26 +27,17 @@ def list_faces_in_collection(collection_id):
 
     print("Faces in collection " + collection_id)
 
+    faces = []
     while tokens:
         faces = response["Faces"]
 
         for face in faces:
-            print(face)
             faces_count += 1
-        if "NextToken" in response:
-            nextToken = response["NextToken"]
-            response = client.list_faces(
-                CollectionId=collection_id, NextToken=nextToken, MaxResults=maxResults
-            )
-        else:
-            tokens = False
-    return faces_count
+            faces.append(face["FaceId"])
 
-
-def main():
-    collection_id = "sun-reko-collection"
-    faces_count = list_faces_in_collection(collection_id)
-    print("faces count: " + str(faces_count))
+    print(faces)
+    # faces_count = delete_faces_from_collection(collection_id, faces)
+    # print("deleted faces count: " + str(faces_count))
 
 
 if __name__ == "__main__":
