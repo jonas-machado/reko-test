@@ -29,15 +29,21 @@ def main():
 
     faces = []
     while tokens:
-        faces = response["Faces"]
+        facesObject = response["Faces"]
 
-        for face in faces:
+        for face in facesObject:
             faces_count += 1
             faces.append(face["FaceId"])
+        if "NextToken" in response:
+            nextToken = response["NextToken"]
+            response = client.list_faces(
+                CollectionId=collection_id, NextToken=nextToken, MaxResults=maxResults
+            )
+        else:
+            tokens = False
 
-    print(faces)
-    # faces_count = delete_faces_from_collection(collection_id, faces)
-    # print("deleted faces count: " + str(faces_count))
+    faces_count = delete_faces_from_collection(collection_id, faces)
+    print("deleted faces count: " + str(faces_count))
 
 
 if __name__ == "__main__":

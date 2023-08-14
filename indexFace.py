@@ -35,7 +35,6 @@ def add_faces_to_collection(bucket, photo, collection_id):
 def main():
     collection_id = "sun-reko-collection"
     bucket = "reko-sun"
-    photo = "021718ce-68da-4417-a0cb-719639e1e365.jpg"
     session = boto3.Session(profile_name="default")
     client = session.client("s3")
 
