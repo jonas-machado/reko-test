@@ -1,6 +1,6 @@
 import boto3
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 import requests
 
@@ -10,7 +10,6 @@ cors = CORS(app, resources={r"/processImage/*": {"origins": "*"}})
 
 @app.route("/processImage", methods=["POST"])
 def process_image():
-    print(request.headers)
     if "image" not in request.files:
         return jsonify({"error": "No image provided"}), 400
 
@@ -23,6 +22,9 @@ def process_image():
 
     client = boto3.client("rekognition")
 
+    session = boto3.Session(profile_name="default")
+    s3 = session.client("s3")
+
     response = client.search_faces_by_image(
         CollectionId=collectionId,
         Image={"Bytes": image_file.read()},
@@ -32,11 +34,18 @@ def process_image():
     )
     faceMatches = response["FaceMatches"]
     print("Matching faces")
-    for match in faceMatches:
-        print("FaceId:" + match["Face"]["FaceId"])
-        print("Similarity: " + "{:.2f}".format(match["Similarity"]) + "%")
-        print(match["Face"])
-    return jsonify({"ok": "success"}), 200
+    faces = []
+    # for match in faceMatches:
+    #     print("FaceId:" + match["Face"]["FaceId"])
+    #     print("Similarity: " + "{:.2f}".format(match["Similarity"]) + "%")
+    #     print(match["Face"]["ExternalImageId"])
+    #     response = s3.get_object(
+    #         Bucket="reko-sun", Key=match["Face"]["ExternalImageId"]
+    #     )
+    #     image_data = response["Body"].read()
+    face_matches = response.get("FaceMatches", [])
+    return jsonify({"faceMatches": face_matches})
+    # return jsonify({"status": "ok"}), 200
 
 
 if __name__ == "__main__":
