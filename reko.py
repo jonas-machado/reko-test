@@ -3,6 +3,7 @@ import boto3
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 import requests
+import base64
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/processImage/*": {"origins": "*"}})
@@ -35,16 +36,18 @@ def process_image():
     faceMatches = response["FaceMatches"]
     print("Matching faces")
     faces = []
-    # for match in faceMatches:
-    #     print("FaceId:" + match["Face"]["FaceId"])
-    #     print("Similarity: " + "{:.2f}".format(match["Similarity"]) + "%")
-    #     print(match["Face"]["ExternalImageId"])
-    #     response = s3.get_object(
-    #         Bucket="reko-sun", Key=match["Face"]["ExternalImageId"]
-    #     )
-    #     image_data = response["Body"].read()
-    face_matches = response.get("FaceMatches", [])
-    return jsonify({"faceMatches": face_matches})
+    for match in faceMatches:
+        print("FaceId:" + match["Face"]["FaceId"])
+        print("Similarity: " + "{:.2f}".format(match["Similarity"]) + "%")
+        print(match["Face"]["ExternalImageId"])
+        response = s3.get_object(
+            Bucket="reko-sun", Key=match["Face"]["ExternalImageId"]
+        )
+        image_data = response["Body"].read()
+        image_base64 = base64.b64encode(image_data).decode("utf-8")
+
+        faces.append(image_base64)
+    return jsonify({"faceMatches": faceMatches, "Images": faces})
     # return jsonify({"status": "ok"}), 200
 
 
