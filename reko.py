@@ -51,5 +51,15 @@ def process_image():
     # return jsonify({"status": "ok"}), 200
 
 
+@app.route("/listObjects", methods=["GET"])
+def process_bucket():
+    session = boto3.Session(profile_name="default")
+    s3 = session.client("s3")
+    bucket = "reko-sun"
+    response = s3.list_objects(Bucket=bucket)
+    print(response)
+    return jsonify({"status": "ok"})
+
+
 if __name__ == "__main__":
     app.run(debug=True)
