@@ -6,7 +6,7 @@ import requests
 import base64
 
 app = Flask(__name__)
-cors = CORS(app, resources={r"/processImage/*": {"origins": "*"}})
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 @app.route("/processImage", methods=["POST"])
@@ -58,7 +58,7 @@ def process_bucket():
     bucket = "reko-sun"
     response = s3.list_objects(Bucket=bucket)
     print(response)
-    return jsonify({"status": "ok"})
+    return jsonify({"status": "ok", "data": response})
 
 
 if __name__ == "__main__":
