@@ -43,6 +43,7 @@ def process_image():
         response = s3.get_object(
             Bucket="reko-sun", Key=match["Face"]["ExternalImageId"]
         )
+        print(response)
         image_data = response["Body"].read()
         image_base64 = base64.b64encode(image_data).decode("utf-8")
 
@@ -58,7 +59,18 @@ def process_bucket():
     bucket = "reko-sun"
     response = s3.list_objects(Bucket=bucket)
     print(response)
-    return jsonify({"status": "ok", "data": response})
+    faceMatches = response['Contents']
+    faces = []
+    for match in faceMatches:
+        response = s3.get_object(
+            Bucket="reko-sun", Key=match["Key"]
+        )
+        print(response)
+        image_data = response["Body"].read()
+        image_base64 = base64.b64encode(image_data).decode("utf-8")
+
+        faces.append(image_base64)
+    return jsonify({"status": "ok", "Images": faces})
 
 
 if __name__ == "__main__":
