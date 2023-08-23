@@ -5,6 +5,8 @@ from flask_cors import CORS
 import requests
 import base64
 import uuid
+import tempfile
+import os
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
@@ -110,13 +112,26 @@ def upload_image():
 
     if "image" not in request.files:
         return jsonify({"error": "No image provided"}), 400
+
     faces_indexed = []
     uploaded_files = request.files.getlist("image")
+
     for image in uploaded_files:
         filename = image.filename
         random_image_name = str(uuid.uuid4()) + filename
         print(random_image_name)
-        s3.upload_file(image, bucket_name, str(random_image_name))
+
+        # Create a temporary file to write the image content
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_filename = temp_file.name
+            temp_file.write(image.read())
+
+        # Upload the temporary file to S3
+        s3.upload_file(temp_filename, bucket_name, random_image_name)
+
+        # Remove the temporary file
+        os.remove(temp_filename)
+
         indexed_faces_count = add_faces_to_collection(
             bucket_name, random_image_name, collection_id
         )
