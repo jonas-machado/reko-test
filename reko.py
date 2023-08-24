@@ -7,9 +7,41 @@ import base64
 import uuid
 import tempfile
 import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+import os
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
+
+load_dotenv()
+
+dialect = os.getenv("DIALECT")
+driver = os.getenv("DRIVER")
+username = os.getenv("USERNAME")
+password = os.getenv("PASSWORD")
+host = os.getenv("HOST")
+port = os.getenv("PORT")
+database_name = os.getenv("DATABASE_NAME")
+
+database = (
+    dialect
+    + "+"
+    + driver
+    + "://"
+    + username
+    + ":"
+    + password
+    + "@"
+    + host
+    + ":"
+    + port
+    + "/"
+    + database_name
+)
+
+engine = create_engine(database)
 
 
 @app.route("/processImage", methods=["POST"])
@@ -46,13 +78,11 @@ def process_image():
         response = s3.get_object(
             Bucket="reko-sun", Key=match["Face"]["ExternalImageId"]
         )
-        print(response)
         image_data = response["Body"].read()
         image_base64 = base64.b64encode(image_data).decode("utf-8")
 
         faces.append(image_base64)
-    return jsonify({"faceMatches": faceMatches, "Images": faces})
-    # return jsonify({"status": "ok"}), 200
+    return jsonify({"faceMatches": faceMatches, "Images": faces}), 200
 
 
 @app.route("/listObjects", methods=["GET"])
@@ -71,7 +101,7 @@ def process_bucket():
         image_base64 = base64.b64encode(image_data).decode("utf-8")
 
         faces.append(image_base64)
-    return jsonify({"status": "ok", "Images": faces})
+    return jsonify({"status": "ok", "Images": faces}), 200
 
 
 def add_faces_to_collection(bucket, photo, collection_id):
@@ -118,7 +148,7 @@ def upload_image():
 
     for image in uploaded_files:
         filename = image.filename
-        random_image_name = str(uuid.uuid4()) + filename
+        random_image_name = str(uuid.uuid4())
         print(random_image_name)
 
         # Create a temporary file to write the image content
@@ -137,7 +167,12 @@ def upload_image():
         )
         faces_indexed.append("Faces indexed count: " + str(indexed_faces_count))
 
-    return jsonify({"status": "ok"})
+    return jsonify({"status": "ok"}), 200
+
+
+@app.route("/register", methods=["POST"])
+def register_client():
+    return jsonify({"status": "ok"}), 200
 
 
 if __name__ == "__main__":
