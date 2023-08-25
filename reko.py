@@ -6,9 +6,13 @@ import requests
 import base64
 import uuid
 import tempfile
-import os
+from handleDB import User
+
+# SQL imports
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session
+
 import os
 from dotenv import load_dotenv
 
@@ -18,14 +22,18 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 load_dotenv()
 
 dialect = os.getenv("DIALECT")
+driver = os.getenv("DRIVER")
 username = os.getenv("USERNAME_DB")
 password = os.getenv("PASSWORD")
 host = os.getenv("HOST")
 port = os.getenv("PORT")
 database_name = os.getenv("DATABASE_NAME")
 
-database = (
+# Replace with your database details
+DATABASE_URI = (
     dialect
+    + "+"
+    + driver
     + "://"
     + username
     + ":"
@@ -38,7 +46,8 @@ database = (
     + database_name
 )
 
-engine = create_engine(database)
+# Create an SQLAlchemy engine
+engine = create_engine(DATABASE_URI)
 
 
 @app.route("/processImage", methods=["POST"])
@@ -167,9 +176,26 @@ def upload_image():
     return jsonify({"status": "ok"}), 200
 
 
-@app.route("/register", methods=["GET"])
+@app.route("/register", methods=["POST"])
 def register_client():
-    print(database)
+    fullname = request.form["name"]
+    email = request.form["email"]
+    instagram = request.form["instagram"]
+    country = request.form["country"]
+    tel = request.form["tel"]
+
+    uploaded_image = request.files["image"]
+    print(uploaded_image)
+    with Session(engine) as session:
+        user = User(
+            fullname=fullname,
+            email=email,
+            instagram=instagram,
+            country=country,
+            tel=tel,
+        )
+        session.add(user)
+        session.commit()
     return jsonify({"status": "ok"}), 200
 
 
