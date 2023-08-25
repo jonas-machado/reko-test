@@ -18,8 +18,7 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 load_dotenv()
 
 dialect = os.getenv("DIALECT")
-driver = os.getenv("DRIVER")
-username = os.getenv("USERNAME")
+username = os.getenv("USERNAME_DB")
 password = os.getenv("PASSWORD")
 host = os.getenv("HOST")
 port = os.getenv("PORT")
@@ -27,8 +26,6 @@ database_name = os.getenv("DATABASE_NAME")
 
 database = (
     dialect
-    + "+"
-    + driver
     + "://"
     + username
     + ":"
@@ -170,8 +167,9 @@ def upload_image():
     return jsonify({"status": "ok"}), 200
 
 
-@app.route("/register", methods=["POST"])
+@app.route("/register", methods=["GET"])
 def register_client():
+    print(database)
     return jsonify({"status": "ok"}), 200
 
 
