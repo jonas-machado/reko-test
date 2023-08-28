@@ -6,7 +6,8 @@ import requests
 import base64
 import uuid
 import tempfile
-#from handleDB import User
+
+from handleDB import User
 
 # SQL imports
 
@@ -47,7 +48,7 @@ DATABASE_URI = (
 )
 
 # Create an SQLAlchemy engine
-#engine = create_engine(DATABASE_URI)
+engine = create_engine(DATABASE_URI)
 
 
 @app.route("/processImage", methods=["POST"])
@@ -154,7 +155,7 @@ def upload_image():
 
     for image in uploaded_files:
         filename = image.filename
-        random_image_name = str(uuid.uuid4())
+        random_image_name = str(uuid.uuid4()) + filename
         print(random_image_name)
 
         # Create a temporary file to write the image content
@@ -178,24 +179,44 @@ def upload_image():
 
 @app.route("/register", methods=["POST"])
 def register_client():
+    session = boto3.Session(profile_name="default")
+    s3 = session.client("s3")
+
     fullname = request.form["name"]
     email = request.form["email"]
     instagram = request.form["instagram"]
-    country = request.form["country"]
-    tel = request.form["tel"]
+    country = int(request.form["country"])
+    tel = int(request.form["tel"])
+
+    collection_id = "sun-reko-collection"
+    bucket_name = "reko-sun"
 
     uploaded_image = request.files["image"]
+
+    filename = uploaded_image.filename
+    random_image_name = str(uuid.uuid4()) + filename
+
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_filename = temp_file.name
+        uploaded_image.save(temp_filename)
+
+    s3.upload_file(temp_filename, bucket_name, random_image_name)
+
     print(uploaded_image)
-    # with Session(engine) as session:
-    #     user = User(
-    #         fullname=fullname,
-    #         email=email,
-    #         instagram=instagram,
-    #         country=country,
-    #         tel=tel,
-    #     )
-    #     session.add(user)
-    #     session.commit()
+    with Session(engine) as session:
+        user = User(
+            fullname=fullname,
+            email=email,
+            instagram=instagram,
+            country=country,
+            tel=tel,
+            image=random_image_name,
+        )
+        session.add(user)
+        session.commit()
+
+    os.remove(temp_filename)
+
     return jsonify({"status": "ok"}), 200
 
 

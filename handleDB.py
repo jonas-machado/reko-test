@@ -5,6 +5,7 @@ from typing import Optional
 from sqlalchemy import create_engine
 from sqlalchemy import ForeignKey
 from sqlalchemy import String
+from sqlalchemy import Integer
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -52,8 +53,9 @@ class User(Base):
     fullname: Mapped[str] = mapped_column(String(30))
     email: Mapped[str] = mapped_column(String(30))
     instagram: Mapped[Optional[str]]
-    country: Mapped[int]
-    tel: Mapped[int]
+    country: Mapped[str]
+    tel: Mapped[str]
+    image: Mapped[str]
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, name={self.name!r}, fullname={self.fullname!r})"
