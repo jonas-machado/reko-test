@@ -6,7 +6,7 @@ import requests
 import base64
 import uuid
 import tempfile
-from handleDB import User
+#from handleDB import User
 
 # SQL imports
 
@@ -47,7 +47,7 @@ DATABASE_URI = (
 )
 
 # Create an SQLAlchemy engine
-engine = create_engine(DATABASE_URI)
+#engine = create_engine(DATABASE_URI)
 
 
 @app.route("/processImage", methods=["POST"])
@@ -186,16 +186,16 @@ def register_client():
 
     uploaded_image = request.files["image"]
     print(uploaded_image)
-    with Session(engine) as session:
-        user = User(
-            fullname=fullname,
-            email=email,
-            instagram=instagram,
-            country=country,
-            tel=tel,
-        )
-        session.add(user)
-        session.commit()
+    # with Session(engine) as session:
+    #     user = User(
+    #         fullname=fullname,
+    #         email=email,
+    #         instagram=instagram,
+    #         country=country,
+    #         tel=tel,
+    #     )
+    #     session.add(user)
+    #     session.commit()
     return jsonify({"status": "ok"}), 200
 
 
