@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import ForeignKey
 from sqlalchemy import String
 from sqlalchemy import Integer
+from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -50,12 +51,12 @@ class Base(DeclarativeBase):
 class User(Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
-    fullname: Mapped[str] = mapped_column(String(30))
-    email: Mapped[str] = mapped_column(String(30))
-    instagram: Mapped[Optional[str]]
-    country: Mapped[str]
-    tel: Mapped[str]
-    image: Mapped[str]
+    fullname: Mapped[str] = mapped_column(String(30), unique=True)
+    email: Mapped[str] = mapped_column(String(30), unique=True)
+    instagram: Mapped[Optional[str]] = mapped_column(String(30), unique=True)
+    country: Mapped[int] = mapped_column(Integer(), unique=True)
+    tel: Mapped[int] = mapped_column(Integer(), unique=True)
+    image: Mapped[str] = mapped_column(String(30), unique=True)
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, name={self.name!r}, fullname={self.fullname!r})"

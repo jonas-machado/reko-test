@@ -200,7 +200,9 @@ def register_client():
         temp_filename = temp_file.name
         uploaded_image.save(temp_filename)
 
-    s3.upload_file(temp_filename, bucket_name, random_image_name)
+    root, extension = os.path.splitext(filename)
+
+    s3.upload_file(temp_filename, bucket_name, "register/" + fullname + extension)
 
     print(uploaded_image)
     with Session(engine) as session:
