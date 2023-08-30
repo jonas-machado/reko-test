@@ -52,12 +52,12 @@ class Base(DeclarativeBase):
 class User(Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
-    fullname: Mapped[str] = mapped_column(String(30), unique=True)
-    email: Mapped[str] = mapped_column(String(30), unique=True)
+    fullname: Mapped[str] = mapped_column(String(50), unique=True)
+    email: Mapped[str] = mapped_column(String(50), unique=True)
     instagram: Mapped[Optional[str]] = mapped_column(String(30), unique=True)
     country: Mapped[int] = mapped_column(Integer())
     tel: Mapped[int] = mapped_column(BigInteger())
-    image: Mapped[str] = mapped_column(String(30))
+    image: Mapped[str] = mapped_column(String(50))
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, name={self.name!r}, fullname={self.fullname!r})"

@@ -177,8 +177,8 @@ def upload_image():
     return jsonify({"status": "ok"}), 200
 
 
-@app.route("/register", methods=["POST"])
-def register_client():
+@app.route("/reference", methods=["POST"])
+def reference_client():
     session = boto3.Session(profile_name="default")
     s3 = session.client("s3")
 
