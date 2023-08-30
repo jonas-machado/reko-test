@@ -212,7 +212,7 @@ def register_client():
             instagram=instagram,
             country=country,
             tel=tel,
-            image=random_image_name,
+            image=fullname + extension,
         )
         session.add(user)
         session.commit()
