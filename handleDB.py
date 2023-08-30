@@ -50,7 +50,20 @@ class Base(DeclarativeBase):
 
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "user"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(50), unique=True)
+    password: Mapped[str] = mapped_column(String(30))
+
+    references: Mapped[List["Reference"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+
+    def __repr__(self) -> str:
+        return f"User(id={self.id!r}, email={self.email!r}, password={self.password!r})"
+
+class Reference(Base):
+    __tablename__ = "reference"
     id: Mapped[int] = mapped_column(primary_key=True)
     fullname: Mapped[str] = mapped_column(String(50), unique=True)
     email: Mapped[str] = mapped_column(String(50), unique=True)

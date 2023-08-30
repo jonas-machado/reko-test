@@ -222,5 +222,27 @@ def reference_client():
     return jsonify({"status": "ok"}), 200
 
 
+@app.route("/register", methods=["POST"])
+def reference_client():
+    email = request.data["email"]
+    password = request.data["password"]
+
+    with Session(engine) as session:
+        user = User(
+            fullname=fullname,
+            email=email,
+            instagram=instagram,
+            country=country,
+            tel=tel,
+            image=fullname + extension,
+        )
+        session.add(user)
+        session.commit()
+
+    os.remove(temp_filename)
+
+    return jsonify({"status": "ok"}), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True)
