@@ -48,20 +48,6 @@ engine = create_engine(DATABASE_URI)
 class Base(DeclarativeBase):
     pass
 
-
-class User(Base):
-    __tablename__ = "user"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    email: Mapped[str] = mapped_column(String(50), unique=True)
-    password: Mapped[str] = mapped_column(String(30))
-
-    references: Mapped[List["Reference"]] = relationship(
-        back_populates="user", cascade="all, delete-orphan"
-    )
-
-    def __repr__(self) -> str:
-        return f"User(id={self.id!r}, email={self.email!r}, password={self.password!r})"
-
 class Reference(Base):
     __tablename__ = "reference"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -72,8 +58,25 @@ class Reference(Base):
     tel: Mapped[int] = mapped_column(BigInteger())
     image: Mapped[str] = mapped_column(String(50))
 
+    user: Mapped[List["User"]] = relationship(
+        back_populates="reference", cascade="all, delete-orphan"
+    )
+
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, name={self.name!r}, fullname={self.fullname!r})"
+
+class User(Base):
+    __tablename__ = "user"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(50), unique=True)
+    password: Mapped[str] = mapped_column(String(30))
+
+    reference_id: Mapped[int] = mapped_column(ForeignKey("reference.id"))
+    reference: Mapped["Reference"] = relationship(back_populates="user")
+
+    def __repr__(self) -> str:
+        return f"User(id={self.id!r}, email={self.email!r}, password={self.password!r})"
+
 
 
 # Example: Create tables (if not already created)

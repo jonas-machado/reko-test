@@ -7,7 +7,7 @@ import base64
 import uuid
 import tempfile
 
-from handleDB import User
+from handleDB import User, Reference
 
 # SQL imports
 
@@ -224,22 +224,16 @@ def reference_client():
 
 @app.route("/register", methods=["POST"])
 def reference_client():
-    email = request.data["email"]
-    password = request.data["password"]
+
+    email, password = request.data["email"], request.data["password"]
 
     with Session(engine) as session:
-        user = User(
-            fullname=fullname,
+        reference = Reference(
             email=email,
-            instagram=instagram,
-            country=country,
-            tel=tel,
-            image=fullname + extension,
+            password=password
         )
-        session.add(user)
+        session.add(reference)
         session.commit()
-
-    os.remove(temp_filename)
 
     return jsonify({"status": "ok"}), 200
 
