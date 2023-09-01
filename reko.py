@@ -13,6 +13,7 @@ from handleDB import User, Reference
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 import os
 from dotenv import load_dotenv
@@ -206,7 +207,7 @@ def reference_client():
 
     print(uploaded_image)
     with Session(engine) as session:
-        user = User(
+        reference = Reference(
             fullname=fullname,
             email=email,
             instagram=instagram,
@@ -214,7 +215,7 @@ def reference_client():
             tel=tel,
             image=fullname + extension,
         )
-        session.add(user)
+        session.add(reference)
         session.commit()
 
     os.remove(temp_filename)
@@ -223,16 +224,23 @@ def reference_client():
 
 
 @app.route("/register", methods=["POST"])
-def reference_client():
+def register_client():
 
-    email, password = request.data["email"], request.data["password"]
+    email = request.json["email"]
+    password = request.json["password"]
+    session = Session(engine)
 
+    finded_user = select(Reference).where(Reference.email == email)
+    for user in session.scalars(finded_user):
+        user_id = user.id
+        print(user)
     with Session(engine) as session:
-        reference = Reference(
+        user = User(
             email=email,
-            password=password
+            password=password,
+            reference_id=user_id
         )
-        session.add(reference)
+        session.add(user)
         session.commit()
 
     return jsonify({"status": "ok"}), 200
