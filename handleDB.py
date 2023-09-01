@@ -48,6 +48,7 @@ engine = create_engine(DATABASE_URI)
 class Base(DeclarativeBase):
     pass
 
+
 class Reference(Base):
     __tablename__ = "reference"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -65,6 +66,7 @@ class Reference(Base):
     def __repr__(self) -> str:
         return f"Reference(id={self.id!r}, tel={self.tel!r}, email={self.email!r}, instagram={self.instagram!r}, country={self.country!r}, fullname={self.fullname!r}, image={self.image!r})"
 
+
 class User(Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -75,8 +77,7 @@ class User(Base):
     reference: Mapped["Reference"] = relationship(back_populates="user")
 
     def __repr__(self) -> str:
-        return f"User(id={self.id!r}, email={self.email!r}, password={self.password!r})"
-
+        return f"User(id={self.id!r}, email={self.email!r}, password={self.password!r}, reference_id={self.reference_id!r})"
 
 
 # Example: Create tables (if not already created)

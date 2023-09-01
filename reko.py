@@ -225,21 +225,16 @@ def reference_client():
 
 @app.route("/register", methods=["POST"])
 def register_client():
-
     email = request.json["email"]
     password = request.json["password"]
     session = Session(engine)
-
+    print(email)
     finded_user = select(Reference).where(Reference.email == email)
     for user in session.scalars(finded_user):
         user_id = user.id
         print(user)
     with Session(engine) as session:
-        user = User(
-            email=email,
-            password=password,
-            reference_id=user_id
-        )
+        user = User(email=email, password=password, reference_id=user_id)
         session.add(user)
         session.commit()
 
