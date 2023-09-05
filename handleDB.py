@@ -56,7 +56,7 @@ class Reference(Base):
     email: Mapped[str] = mapped_column(String(50), unique=True)
     instagram: Mapped[Optional[str]] = mapped_column(String(30), unique=True)
     country: Mapped[int] = mapped_column(Integer())
-    tel: Mapped[int] = mapped_column(BigInteger())
+    tel: Mapped[str] = mapped_column(String(11))
     image: Mapped[str] = mapped_column(String(50))
 
     user: Mapped[List["User"]] = relationship(
@@ -64,7 +64,7 @@ class Reference(Base):
     )
 
     def __repr__(self) -> str:
-        return f"Reference(id={self.id!r}, tel={self.tel!r}, email={self.email!r}, instagram={self.instagram!r}, country={self.country!r}, fullname={self.fullname!r}, image={self.image!r})"
+        return f"Reference(id={self.id!r}, tel={self.tel!r}, email={self.email!r}, instagram={self.instagram!r}, country={self.country!r}, fullname={self.fullname!r}, image={self.image!r}, user={self.user!r})"
 
 
 class User(Base):

@@ -233,10 +233,10 @@ def register_client():
     for user in session.scalars(finded_user):
         user_id = user.id
         print(user)
-    with Session(engine) as session:
-        user = User(email=email, password=password, reference_id=user_id)
-        session.add(user)
-        session.commit()
+    # with Session(engine) as session:
+    #     user = User(email=email, password=password, reference_id=user_id)
+    #     session.add(user)
+    #     session.commit()
 
     return jsonify({"status": "ok"}), 200
 
