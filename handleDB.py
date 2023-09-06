@@ -49,6 +49,19 @@ class Base(DeclarativeBase):
     pass
 
 
+class User(Base):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(50), unique=True)
+    password: Mapped[str] = mapped_column(String(30))
+
+    reference_id: Mapped[Optional[int]] = mapped_column(ForeignKey("reference.id"))
+    reference: Mapped[Optional["Reference"]] = relationship(back_populates="user")
+
+    def __repr__(self) -> str:
+        return f"User(id={self.id!r}, email={self.email!r}, password={self.password!r}, reference_id={self.reference_id!r}, reference={self.reference!r})"
+
+
 class Reference(Base):
     __tablename__ = "reference"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -56,28 +69,15 @@ class Reference(Base):
     email: Mapped[str] = mapped_column(String(50), unique=True)
     instagram: Mapped[Optional[str]] = mapped_column(String(30), unique=True)
     country: Mapped[int] = mapped_column(Integer())
-    tel: Mapped[str] = mapped_column(String(11))
+    tel: Mapped[str] = mapped_column(String(30))
     image: Mapped[str] = mapped_column(String(50))
 
-    user: Mapped[List["User"]] = relationship(
+    user: Mapped[Optional["User"]] = relationship(
         back_populates="reference", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:
         return f"Reference(id={self.id!r}, tel={self.tel!r}, email={self.email!r}, instagram={self.instagram!r}, country={self.country!r}, fullname={self.fullname!r}, image={self.image!r}, user={self.user!r})"
-
-
-class User(Base):
-    __tablename__ = "users"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    email: Mapped[str] = mapped_column(String(50), unique=True)
-    password: Mapped[str] = mapped_column(String(30))
-
-    reference_id: Mapped[int] = mapped_column(ForeignKey("reference.id"))
-    reference: Mapped["Reference"] = relationship(back_populates="user")
-
-    def __repr__(self) -> str:
-        return f"User(id={self.id!r}, email={self.email!r}, password={self.password!r}, reference_id={self.reference_id!r})"
 
 
 # Example: Create tables (if not already created)

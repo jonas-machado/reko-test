@@ -42,11 +42,7 @@ session = Session(engine)
 
 
 # set children to load eagerly with a join
-stmt = (
-    select(Reference)
-    .join(Reference.user)
-    .filter(Reference.email == "kalanyishihara@gmail.com")
-)
+stmt = select(Reference).filter(Reference.email == "kalanyishihara@gmail.com")
 result = session.scalars(stmt).unique().all()
 print(result)
 # for user in session.scalars(stmt).unique().all():
