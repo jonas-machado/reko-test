@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import lazyload
 from sqlalchemy.orm import joinedload
-from handleDB import Reference
+from handleDB import Reference, User
 from dotenv import load_dotenv
 import os
 from sqlalchemy import create_engine
@@ -42,8 +42,9 @@ session = Session(engine)
 
 
 # set children to load eagerly with a join
-stmt = select(Reference).filter(Reference.email == "kalanyishihara@gmail.com")
-result = session.scalars(stmt).unique().all()
-print(result)
+stmt = select(Reference)
+result = session.scalars(stmt)
+for user in result:
+    print(user)
 # for user in session.scalars(stmt).unique().all():
 # print(user)

@@ -214,6 +214,7 @@ def reference_client():
             country=country,
             tel=tel,
             image=fullname + extension,
+            user_email=email,
         )
         session.add(reference)
         session.commit()
@@ -229,12 +230,8 @@ def register_client():
     password = request.json["password"]
     session = Session(engine)
     print(email)
-    finded_user = select(Reference).where(Reference.email == email)
-    for user in session.scalars(finded_user):
-        user_id = user.id
-        print(user)
     with Session(engine) as session:
-        user = User(email=email, password=password, reference_id=user_id)
+        user = User(email=email, password=password)
         session.add(user)
         session.commit()
 
