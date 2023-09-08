@@ -12,6 +12,8 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
+from sqlalchemy import Column
+from sqlalchemy import Table
 
 load_dotenv()
 
@@ -49,22 +51,26 @@ class Base(DeclarativeBase):
     pass
 
 
-class User(Base):
-    __tablename__ = "users"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    email: Mapped[str] = mapped_column(String(50), unique=True)
-    password: Mapped[str] = mapped_column(String(30))
+# class User(Base):
+#     __tablename__ = "users"
+#     id: Mapped[int] = mapped_column(primary_key=True)
+#     email: Mapped[str] = mapped_column(String(50), unique=True)
+#     password: Mapped[str] = mapped_column(String(30))
 
-    reference: Mapped[List["Reference"]] = relationship(
-        "Reference", backref="reference"
-    )
+#     reference: Mapped[List["Reference"]] = relationship(
+#         secondary=association_table,
+#         back_populates="user",
+#         cascade="all, delete",
+#         passive_deletes=True,
+#     )
 
-    def __repr__(self) -> str:
-        return f"User(id={self.id!r}, email={self.email!r}, password={self.password!r}, reference_id={self.reference_id!r}, reference={self.reference!r})"
+#     def __repr__(self) -> str:
+#         return f"User(id={self.id!r}, email={self.email!r}, password={self.password!r}, reference={self.reference!r})"
 
 
 class Reference(Base):
     __tablename__ = "reference"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     fullname: Mapped[str] = mapped_column(String(50), unique=True)
     email: Mapped[str] = mapped_column(String(50), unique=True)
@@ -73,10 +79,8 @@ class Reference(Base):
     tel: Mapped[str] = mapped_column(String(30))
     image: Mapped[str] = mapped_column(String(50))
 
-    user_email: Mapped[Optional[str]] = mapped_column(ForeignKey("users.email"))
-
     def __repr__(self) -> str:
-        return f"Reference(id={self.id!r}, tel={self.tel!r}, email={self.email!r}, instagram={self.instagram!r}, country={self.country!r}, fullname={self.fullname!r}, image={self.image!r}, user={self.user!r})"
+        return f"Reference(id={self.id!r}, tel={self.tel!r}, email={self.email!r}, instagram={self.instagram!r}, country={self.country!r}, fullname={self.fullname!r}, image={self.image!r})"
 
 
 # Example: Create tables (if not already created)

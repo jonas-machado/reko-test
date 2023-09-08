@@ -42,7 +42,7 @@ session = Session(engine)
 
 
 # set children to load eagerly with a join
-stmt = select(Reference)
+stmt = select(User)
 result = session.scalars(stmt)
 for user in result:
     print(user)

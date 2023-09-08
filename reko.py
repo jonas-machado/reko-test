@@ -7,7 +7,7 @@ import base64
 import uuid
 import tempfile
 
-from handleDB import User, Reference
+from handleDB import Reference
 
 # SQL imports
 
@@ -204,7 +204,9 @@ def reference_client():
     root, extension = os.path.splitext(filename)
 
     s3.upload_file(temp_filename, bucket_name, "register/" + fullname + extension)
-
+    indexed_faces_count = add_faces_to_collection(
+        bucket_name, random_image_name, collection_id
+    )
     print(uploaded_image)
     with Session(engine) as session:
         reference = Reference(
@@ -214,7 +216,6 @@ def reference_client():
             country=country,
             tel=tel,
             image=fullname + extension,
-            user_email=email,
         )
         session.add(reference)
         session.commit()
@@ -224,18 +225,16 @@ def reference_client():
     return jsonify({"status": "ok"}), 200
 
 
-@app.route("/register", methods=["POST"])
-def register_client():
+@app.route("/login", methods=["POST"])
+def login_client():
     email = request.json["email"]
-    password = request.json["password"]
     session = Session(engine)
-    print(email)
-    with Session(engine) as session:
-        user = User(email=email, password=password)
-        session.add(user)
-        session.commit()
-
-    return jsonify({"status": "ok"}), 200
+    stmt = select(Reference).where(Reference.email == email)
+    for user in session.scalars(stmt):
+        if user:
+            print(f"{user}")
+            return jsonify({"auth": True}), 200
+    return jsonify({"auth": False}), 403
 
 
 if __name__ == "__main__":
