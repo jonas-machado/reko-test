@@ -112,14 +112,14 @@ def process_bucket():
     return jsonify({"status": "ok", "Images": faces}), 200
 
 
-def add_faces_to_collection(bucket, photo, collection_id):
+def add_faces_to_collection(bucket, photo, image_id, collection_id):
     session = boto3.Session(profile_name="default")
     client = session.client("rekognition")
 
     response = client.index_faces(
         CollectionId=collection_id,
         Image={"S3Object": {"Bucket": bucket, "Name": photo}},
-        ExternalImageId=photo,
+        ExternalImageId=image_id,
         MaxFaces=1,
         QualityFilter="AUTO",
         DetectionAttributes=["ALL"],
@@ -142,7 +142,6 @@ def add_faces_to_collection(bucket, photo, collection_id):
 
 @app.route("/upload", methods=["POST"])
 def upload_image():
-
     session = boto3.Session(profile_name="default")
     s3 = session.client("s3")
 
@@ -150,7 +149,7 @@ def upload_image():
 
     collection_id = "sun-reko-collection"
     bucket_name = "reko-sun"
-    
+
     threshold = 70
     maxFaces = 100
 
@@ -172,15 +171,15 @@ def upload_image():
         random_image_name = str(uuid.uuid4()) + extension
 
         # Remove the temporary file
-        with open(temp_filename, 'rb') as image_file:
+        with open(temp_filename, "rb") as image_file:
             response = client.search_faces_by_image(
                 CollectionId=collection_id,
-                Image={"Bytes":  image_file.read()},
+                Image={"Bytes": image_file.read()},
                 # Image={"S3Object": {"Bucket": bucket, "Name": fileName}},
                 FaceMatchThreshold=threshold,
                 MaxFaces=maxFaces,
             )
-            
+
         faceMatches = response["FaceMatches"]
 
         for match in faceMatches:
@@ -196,11 +195,12 @@ def upload_image():
                     print(name)
                     print(root, extension)
 
-                    s3.upload_file(temp_filename, bucket_name, name + "/" + random_image_name)
-            #faces.append(image_base64)
+                    s3.upload_file(
+                        temp_filename, bucket_name, name + "/" + random_image_name
+                    )
+            # faces.append(image_base64)
 
         os.remove(temp_filename)
-
 
     return jsonify({"status": "ok"}), 200
 
@@ -228,11 +228,12 @@ def reference_client():
         uploaded_image.save(temp_filename)
 
     root, extension = os.path.splitext(filename)
-
-    s3.upload_file(temp_filename, bucket_name, fullname + extension)
+    image_key = f"reference/{fullname}{extension}"
+    image_id = fullname + extension
+    s3.upload_file(temp_filename, bucket_name, image_key)
 
     indexed_faces_count = add_faces_to_collection(
-        bucket_name, fullname + extension, collection_id
+        bucket_name, image_key, image_id, collection_id
     )
 
     print(uploaded_image)
