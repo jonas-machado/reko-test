@@ -142,11 +142,17 @@ def add_faces_to_collection(bucket, photo, collection_id):
 
 @app.route("/upload", methods=["POST"])
 def upload_image():
+
     session = boto3.Session(profile_name="default")
     s3 = session.client("s3")
 
+    client = boto3.client("rekognition")
+
     collection_id = "sun-reko-collection"
     bucket_name = "reko-sun"
+    
+    threshold = 70
+    maxFaces = 100
 
     if "image" not in request.files:
         return jsonify({"error": "No image provided"}), 400
@@ -165,15 +171,38 @@ def upload_image():
             temp_file.write(image.read())
 
         # Upload the temporary file to S3
-        s3.upload_file(temp_filename, bucket_name, random_image_name)
 
         # Remove the temporary file
+
+        response = client.search_faces_by_image(
+            CollectionId=collection_id,
+            Image={"Bytes": image.read()},
+            # Image={"S3Object": {"Bucket": bucket, "Name": fileName}},
+            FaceMatchThreshold=threshold,
+            MaxFaces=maxFaces,
+        )
+            
+        faceMatches = response["FaceMatches"]
+
+        for match in faceMatches:
+            print("FaceId:" + match["Face"]["FaceId"])
+            print("Similarity: " + "{:.2f}".format(match["Similarity"]) + "%")
+            print(match["Face"]["ExternalImageId"])
+            image_id = match["Face"]["ExternalImageId"]
+            stmt = select(Reference).where(Reference.image == image_id)
+            result = session.scalars(stmt)
+
+            for user_image in result:
+                print(user_image)
+
+            image_data = response["Body"].read()
+            image_base64 = base64.b64encode(image_data).decode("utf-8")
+
+            s3.upload_file(temp_filename, bucket_name, random_image_name)
+            #faces.append(image_base64)
+
         os.remove(temp_filename)
 
-        indexed_faces_count = add_faces_to_collection(
-            bucket_name, random_image_name, collection_id
-        )
-        faces_indexed.append("Faces indexed count: " + str(indexed_faces_count))
 
     return jsonify({"status": "ok"}), 200
 
@@ -204,9 +233,11 @@ def reference_client():
     root, extension = os.path.splitext(filename)
 
     s3.upload_file(temp_filename, bucket_name, "register/" + fullname + extension)
+
     indexed_faces_count = add_faces_to_collection(
         bucket_name, random_image_name, collection_id
     )
+
     print(uploaded_image)
     with Session(engine) as session:
         reference = Reference(
