@@ -162,25 +162,24 @@ def upload_image():
 
     for image in uploaded_files:
         filename = image.filename
-        random_image_name = str(uuid.uuid4()) + filename
-        print(random_image_name)
 
         # Create a temporary file to write the image content
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             temp_filename = temp_file.name
             temp_file.write(image.read())
 
-        # Upload the temporary file to S3
+        root, extension = os.path.splitext(filename)
+        random_image_name = str(uuid.uuid4()) + extension
 
         # Remove the temporary file
-
-        response = client.search_faces_by_image(
-            CollectionId=collection_id,
-            Image={"Bytes": image.read()},
-            # Image={"S3Object": {"Bucket": bucket, "Name": fileName}},
-            FaceMatchThreshold=threshold,
-            MaxFaces=maxFaces,
-        )
+        with open(temp_filename, 'rb') as image_file:
+            response = client.search_faces_by_image(
+                CollectionId=collection_id,
+                Image={"Bytes":  image_file.read()},
+                # Image={"S3Object": {"Bucket": bucket, "Name": fileName}},
+                FaceMatchThreshold=threshold,
+                MaxFaces=maxFaces,
+            )
             
         faceMatches = response["FaceMatches"]
 
@@ -189,16 +188,15 @@ def upload_image():
             print("Similarity: " + "{:.2f}".format(match["Similarity"]) + "%")
             print(match["Face"]["ExternalImageId"])
             image_id = match["Face"]["ExternalImageId"]
-            stmt = select(Reference).where(Reference.image == image_id)
-            result = session.scalars(stmt)
+            with Session(engine) as session_pg:
+                stmt = select(Reference).where(Reference.image == image_id)
 
-            for user_image in result:
-                print(user_image)
+                for user_image in session_pg.scalars(stmt):
+                    name = user_image.fullname
+                    print(name)
+                    print(root, extension)
 
-            image_data = response["Body"].read()
-            image_base64 = base64.b64encode(image_data).decode("utf-8")
-
-            s3.upload_file(temp_filename, bucket_name, random_image_name)
+                    s3.upload_file(temp_filename, bucket_name, name + "/" + random_image_name)
             #faces.append(image_base64)
 
         os.remove(temp_filename)
@@ -212,7 +210,7 @@ def reference_client():
     session = boto3.Session(profile_name="default")
     s3 = session.client("s3")
 
-    fullname = request.form["name"]
+    fullname = request.form["name"].replace(" ", "_")
     email = request.form["email"]
     instagram = request.form["instagram"]
     country = int(request.form["country"])
@@ -224,18 +222,17 @@ def reference_client():
     uploaded_image = request.files["image"]
 
     filename = uploaded_image.filename
-    random_image_name = str(uuid.uuid4()) + filename
-
+    print(fullname)
     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
         temp_filename = temp_file.name
         uploaded_image.save(temp_filename)
 
     root, extension = os.path.splitext(filename)
 
-    s3.upload_file(temp_filename, bucket_name, "register/" + fullname + extension)
+    s3.upload_file(temp_filename, bucket_name, fullname + extension)
 
     indexed_faces_count = add_faces_to_collection(
-        bucket_name, random_image_name, collection_id
+        bucket_name, fullname + extension, collection_id
     )
 
     print(uploaded_image)
