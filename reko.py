@@ -257,11 +257,27 @@ def reference_client():
 @app.route("/login", methods=["POST"])
 def login_client():
     email = request.json["email"]
+    session_s3 = boto3.Session(profile_name="default")
+    s3 = session_s3.client("s3")
+
+    bucket = "reko-sun"
+
     session = Session(engine)
     stmt = select(Reference).where(Reference.email == email)
     for user in session.scalars(stmt):
         if user:
             print(f"{user}")
+            response = s3.list_objects(Bucket=bucket)
+            print(response)
+            faceMatches = response["Contents"]
+            faces = []
+            for match in faceMatches:
+                response = s3.get_object(Bucket="reko-sun", Key=match["Key"])
+                print(response)
+                image_data = response["Body"].read()
+                image_base64 = base64.b64encode(image_data).decode("utf-8")
+
+                faces.append(image_base64)
             return jsonify({"auth": True}), 200
     return jsonify({"auth": False}), 403
 
